@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <iostream>
+#include <string>
 #include <tlhelp32.h>
 
 // Function to get the process ID by process name
@@ -52,6 +53,8 @@ bool InjectDLL(DWORD processId, const char* dllPath) {
     }
 
     HANDLE hThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)LoadLibraryA, pAlloc, 0, NULL);
+
+
     if (hThread == NULL) {
         std::cerr << "Failed to create remote thread!" << std::endl;
         VirtualFreeEx(hProcess, pAlloc, 0, MEM_RELEASE);
@@ -66,11 +69,15 @@ bool InjectDLL(DWORD processId, const char* dllPath) {
     return true;
 }
 
+// Definition of the funciton poninter
+typedef void (*HookFunction)(const char*);
+
 int main() {
     
-    const char* dllPath = "D:\\Alans Junk\\ALAN stuff\\Code Engineering\\cpp advanced\\hook funcitons\\simple-hook-target\\hook.dll"; // Change this to the full path of your DLL
+    // Change this to the full path of your DLL
+    const char* dllPath = "D:\\Code Engineering\\cpp advanced\\hook funcitons\\simple-hook-target\\hook.dll";
 
-    HWND hwnd = FindWindowA(0, "snake - Notepad");
+    HWND hwnd = FindWindowA(0, "GTA: Vice City");
     if (!hwnd)
     {
         std::cout << "Window not found!" << std::endl;
@@ -88,6 +95,25 @@ int main() {
         if (InjectDLL(pId, dllPath)) 
         {
             std::cout << "DLL injected successfully!" << std::endl;
+
+            std::cout << "Enter the message: ";
+            std::string message;
+            std::getline(std::cin, message);
+
+            std:: cout << message << std::endl;
+
+            HookFunction _hookFunction = (HookFunction)GetProcAddress(LoadLibraryA(dllPath), "HookFunction");
+
+            if (_hookFunction) {
+                _hookFunction(message.c_str());
+            } else {
+                std::cerr << "Failed to get function address!" << std::endl;
+            }
+
+            // TODO: the dll function is being called already now we need to inject it into the target process and call the function from there
+
+
+
         } else 
         {
             std::cerr << "DLL injection failed!" << std::endl;
