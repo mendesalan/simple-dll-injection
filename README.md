@@ -1,4 +1,4 @@
-### How to hook into a proccess using .dll
+### How to dll inject into another proccess.
 
 Firstly compile the hook.cpp file into a dll using GCC:    
 `g++ -shared -o hook.dll hook.cpp`
